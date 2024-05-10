@@ -1,0 +1,64 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Define the vendor table
+model Vendor {
+  id       String  @id @default(uuid()) @db.Uuid
+  name     String
+  location String
+  email    String  @unique
+  mobile   String?
+
+  // Define the relationship with farmer_product table
+  farmerProducts FarmerProduct[]
+}
+
+// Define the product table
+model Product {
+  id   String @id @default(uuid()) @db.Uuid
+  name String
+  productId String
+
+  // Define the relationship with farmer_product table
+  farmerProducts FarmerProduct[]
+}
+
+// Define the farmer table
+model Farmer {
+  id         String  @id @default(uuid()) @db.Uuid
+  name       String
+  email      String  @unique
+  mobile     String?
+  address    String
+  password   String
+  isVerified Boolean
+
+  // Define the relationship with farmer_product table
+  farmerProducts FarmerProduct[]
+}
+
+// Define the farmer_product table
+model FarmerProduct {
+  id        String @id @default(uuid()) @db.Uuid
+  farmerId  String @unique @db.Uuid
+  productId String @unique @db.Uuid
+  txnId     String @unique @db.Uuid
+
+  // Define the relationships with other tables
+  farmer   Farmer  @relation(fields: [farmerId], references: [id])
+  product  Product @relation(fields: [productId], references: [id])
+  vendor   Vendor? @relation(fields: [vendorId], references: [id])
+  vendorId String? @db.Uuid
+}

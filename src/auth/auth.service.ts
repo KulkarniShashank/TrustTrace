@@ -35,8 +35,8 @@ export class AuthService {
     }
 
     const isValidPassword = await bcrypt.compare(
-      farmerDetails.password,
       farmer.password,
+      farmerDetails.password,
     );
     if (!isValidPassword) {
       throw new UnauthorizedException('Invalid email or password');

@@ -2,6 +2,7 @@ import { Controller, Post, Body, HttpStatus, Res } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Response } from 'express';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { FarmerDto } from 'src/dtos/farmer.model.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -13,7 +14,7 @@ export class AuthController {
     description: 'Register User.',
   })
   @ApiResponse({ status: HttpStatus.CREATED, description: 'Success' })
-  async register(@Body() farmer, @Res() res: Response) {
+  async register(@Body() farmer: FarmerDto, @Res() res: Response) {
     await this.authService.register(farmer);
     const finalResponse = {
       statusCode: HttpStatus.CREATED,

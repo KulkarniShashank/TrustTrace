@@ -26,11 +26,12 @@ export class ProductController {
     @Body() addProduct: AddProduct,
     @Res() res: Response,
   ): Promise<Response> {
-    await this.productService.addProduct(addProduct);
+    const productRespose = await this.productService.addProduct(addProduct);
 
     const finalResponse = {
       statusCode: HttpStatus.CREATED,
       message: 'Product added successfully',
+      data: productRespose,
     };
 
     return res.status(HttpStatus.CREATED).json(finalResponse);
@@ -47,7 +48,7 @@ export class ProductController {
     @Param('productId') productId: string,
     @Res() res: Response,
   ): Promise<Response> {
-    await this.productService.getProductByProductDetailsId(
+    const productById = await this.productService.getProductByProductDetailsId(
       productId,
       productDetailId,
     );
@@ -55,6 +56,7 @@ export class ProductController {
     const finalResponse = {
       statusCode: HttpStatus.OK,
       message: 'Product retrieve successfully',
+      data: productById,
     };
 
     return res.status(HttpStatus.OK).json(finalResponse);
@@ -70,11 +72,13 @@ export class ProductController {
     @Param('productId') productId: string,
     @Res() res: Response,
   ): Promise<Response> {
-    await this.productService.getProductDetails(productId);
+    const productDetails =
+      await this.productService.getProductDetails(productId);
 
     const finalResponse = {
       statusCode: HttpStatus.OK,
       message: 'Product retrieve successfully',
+      data: productDetails,
     };
 
     return res.status(HttpStatus.OK).json(finalResponse);

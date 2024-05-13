@@ -5,6 +5,7 @@ import { abi } from 'config';
 import { v4 as uuidv4 } from 'uuid';
 import * as dotenv from 'dotenv';
 dotenv.config();
+import * as QRCode from 'qrcode';
 
 @Injectable()
 export class ProductService {
@@ -60,5 +61,22 @@ export class ProductService {
     );
     const productDetails = await registry.getProduct(productId);
     return productDetails;
+  }
+
+  async generateQrCode(
+    productId: string,
+    productName: string,
+  ): Promise<string> {
+    const jsonData = {
+      productId,
+      productName,
+    };
+    const jsonString = JSON.stringify(jsonData);
+    try {
+      const qrCode = await QRCode.toDataURL(jsonString);
+      return qrCode;
+    } catch (error) {
+      throw error;
+    }
   }
 }

@@ -4,7 +4,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import * as jwt from 'jsonwebtoken';
 import { FarmerDto } from '../dtos/farmer.model.dto';
 import * as bcrypt from 'bcryptjs'; // Import bcrypt
-import { PrismaService } from '../../prisma/prisma-service.service'; // Import PrismaService
+import { PrismaService } from '../prisma/prisma-service.service'; // Import PrismaService
 
 @Injectable()
 export class AuthService {

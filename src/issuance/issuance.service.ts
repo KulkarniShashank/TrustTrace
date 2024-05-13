@@ -1,11 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import * as dotenv from 'dotenv';
-import { PrismaService } from 'prisma/prisma-service.service';
+import { PrismaService } from '@src/prisma/prisma-service.service';
 import { HttpService } from '@nestjs/axios/dist';
 dotenv.config();
 import * as QRCode from 'qrcode';
 import { sendEmail } from 'send-grid-helper-file';
 import { OutOfBandIssuance } from './templates/out-of-band-issuance.template';
+import CREDEBLAuthTokenService from '@src/CREDEBL-Auth/auth-token';
 
 @Injectable()
 export class IssuanceService {
@@ -13,6 +14,7 @@ export class IssuanceService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly outOfBandIssuances: OutOfBandIssuance,
+    private readonly credeblAuthTokenService: CREDEBLAuthTokenService,
   ) {}
 
   async outOfBandIssuance(email: string): Promise<any> {
@@ -56,11 +58,9 @@ export class IssuanceService {
       };
 
       const agentEndpoint = `${process.env.AGENT_ENDPOINT}/credentials/create-offer-oob`;
-      const agentToken = process.env.AGENT_TOKEN;
       const credentialCreateOfferDetails = await this._outOfBandCredentialOffer(
         outOfBandIssuancePayload,
         agentEndpoint,
-        agentToken,
       );
 
       const invitationId: string =
@@ -104,9 +104,9 @@ export class IssuanceService {
   async _outOfBandCredentialOffer(
     outOfBandIssuancePayload,
     url: string,
-    token: string,
   ): Promise<any> {
     try {
+      const token = await this.credeblAuthTokenService.serviceAuthentication();
       const sendOutOfbandCredentialOffer = await this.httpService.post(
         url,
         outOfBandIssuancePayload,

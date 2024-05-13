@@ -4,30 +4,45 @@ import { AddProduct } from '../dtos/add-product.dto';
 import { abi } from 'config';
 import { v4 as uuidv4 } from 'uuid';
 import * as dotenv from 'dotenv';
+import { HttpService } from '@nestjs/axios';
 dotenv.config();
 
 @Injectable()
 export class ProductService {
+  private readonly httpService = new HttpService();
   async addProduct(addProduct: AddProduct): Promise<any> {
-    const url = process.env.URL;
-    const contrctAdress = process.env.CONTRACT_ADDRESS;
-    const provider = new ethers.providers.JsonRpcProvider(url);
-    const wallet: ethers.Wallet = new ethers.Wallet(
-      '0x66bfee94000659e9527ee9f318e409227bcd9e322873e619225e25c15fc3ecc7',
-      provider,
-    );
-    const registry: ethers.Contract = new ethers.Contract(
-      contrctAdress,
-      abi,
-      wallet,
-    );
-    const productDetailId = uuidv4();
-    const productDetails = await registry.addProductDetails(
-      '0xa2AFe49863a7Cc55aF783872A1532B80bf1f6BF9',
-      productDetailId,
-      addProduct.productDetailPayload,
-    );
-    return productDetails;
+    try {
+      const url = process.env.URL;
+      const contractAddress = process.env.CONTRACT_ADDRESS;
+      if (!url || !contractAddress) {
+        throw new Error('URL or contract address is not provided.');
+      }
+      const provider = new ethers.providers.JsonRpcProvider(url);
+      const wallet: ethers.Wallet = new ethers.Wallet(
+        process.env.OWNER_PRIVATE_KEY,
+        provider,
+      );
+      const registry: ethers.Contract = new ethers.Contract(
+        contractAddress,
+        abi,
+        wallet,
+      );
+      const productDetailId = uuidv4();
+      const productDetails = await registry.addProductDetails(
+        addProduct.productId,
+        productDetailId,
+        JSON.stringify(addProduct.productDetailPayload),
+      );
+      const productDetailsResponse = {
+        productTxDetails: productDetails,
+        productTnxId: productDetailId,
+        productId: addProduct.productId,
+      };
+      return productDetailsResponse;
+    } catch (error) {
+      console.error('Error in addProduct:', error);
+      throw error;
+    }
   }
 
   async getProductByProductDetailsId(
@@ -46,7 +61,7 @@ export class ProductService {
       productId,
       productDetailsId,
     );
-    return productDetails;
+    return JSON.parse(productDetails);
   }
 
   async getProductDetails(productId: string): Promise<any> {
@@ -58,7 +73,20 @@ export class ProductService {
       abi,
       provider,
     );
-    const productDetails = await registry.getProduct(productId);
-    return productDetails;
+
+    const productDetails = await registry.getAllProduct(productId);
+    const linkedResourceMetadata = productDetails.map((element: string) => {
+      return JSON.parse(element);
+    });
+    return linkedResourceMetadata;
+  }
+
+  async generateProductId(): Promise<any> {
+    const url = `${process.env.AGENT_ENDPOINT}/polygon/create-keys`;
+    const accessToken = process.env.AGENT_TOKEN;
+    const generateToken = await this.httpService.get(url, {
+      headers: { authorization: accessToken },
+    });
+    return generateToken;
   }
 }

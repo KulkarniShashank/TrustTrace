@@ -83,4 +83,22 @@ export class ProductController {
 
     return res.status(HttpStatus.OK).json(finalResponse);
   }
+
+  @Get('/')
+  @ApiOperation({
+    summary: 'generateProductId',
+    description: 'generateProductId',
+  })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Success' })
+  async generateProductId(@Res() res: Response): Promise<Response> {
+    const productDetails = await this.productService.generateProductId();
+
+    const finalResponse = {
+      statusCode: HttpStatus.OK,
+      message: 'Product Id generated successfully',
+      data: productDetails,
+    };
+
+    return res.status(HttpStatus.OK).json(finalResponse);
+  }
 }

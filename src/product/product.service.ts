@@ -4,10 +4,12 @@ import { AddProduct } from '../dtos/add-product.dto';
 import { abi } from 'config';
 import { v4 as uuidv4 } from 'uuid';
 import * as dotenv from 'dotenv';
+import { HttpService } from '@nestjs/axios';
 dotenv.config();
 
 @Injectable()
 export class ProductService {
+  private readonly httpService = new HttpService();
   async addProduct(addProduct: AddProduct): Promise<any> {
     try {
       const url = process.env.URL;
@@ -27,13 +29,14 @@ export class ProductService {
       );
       const productDetailId = uuidv4();
       const productDetails = await registry.addProductDetails(
-        '0x14cb91F35B1B1e95FF9e69593614967480E5758F',
+        addProduct.productId,
         productDetailId,
         JSON.stringify(addProduct.productDetailPayload),
       );
       const productDetailsResponse = {
         productTxDetails: productDetails,
         productTnxId: productDetailId,
+        productId: addProduct.productId,
       };
       return productDetailsResponse;
     } catch (error) {
@@ -76,5 +79,14 @@ export class ProductService {
       return JSON.parse(element);
     });
     return linkedResourceMetadata;
+  }
+
+  async generateProductId(): Promise<any> {
+    const url = `${process.env.AGENT_ENDPOINT}/polygon/create-keys`;
+    const accessToken = process.env.AGENT_TOKEN;
+    const generateToken = await this.httpService.get(url, {
+      headers: { authorization: accessToken },
+    });
+    return generateToken;
   }
 }

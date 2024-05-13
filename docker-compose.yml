@@ -1,0 +1,38 @@
+version: "3.4"
+name: trust-trace-services-docker
+services:
+
+  db:
+    image: postgres:latest
+    volumes:
+      - ./volumes/postgres-data:/postgres/postgres-data:z
+    ports:
+      - 5414:5432
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-q", "-d", "postgres", "-U", "root" ]
+      timeout: 45s
+      interval: 10s
+      retries: 10
+    restart: always
+    environment:
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=root
+      - POSTGRES_DB=Trust_Trace_db
+
+  trust-trace:
+    container_name: trust-trace-services
+    build:
+     context: ./
+     dockerfile: Dockerfile
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "3005:3005"
+    env_file:
+      ./.env
+    depends_on:
+      - db
+    links:
+      - "db"
+
+    

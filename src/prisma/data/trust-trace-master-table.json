@@ -39,11 +39,13 @@
   "productData": [
     {
       "id": "b3a1b9f6-5f4d-456e-89cb-982d93e289f8",
-      "name": "Rice"
+      "name": "Rice",
+      "productAddress": "0x52aAff7cb8020955a6284304799a0474186C88d6"
     },
     {
       "id": "f9b2d8c3-9a49-4d83-837f-4a27f25b6b5e",
-      "name": "Mango"
+      "name": "Mango",
+      "productAddress": "0xfd681674eadd2e8B39890F940a8190292248143A"
     }
   ]
 }

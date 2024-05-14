@@ -38,20 +38,20 @@ export class ProductService {
       );
       const productDetailId = uuidv4();
       const productDetails = await registry.addProductDetails(
-        addProduct.productId,
+        addProduct.productAddress,
         productDetailId,
         JSON.stringify(addProduct.productDetailPayload),
       );
       const productDetailsResponse = {
         productTxDetails: productDetails,
         productTnxId: productDetailId,
-        productId: addProduct.productId,
+        productId: addProduct.productAddress,
       };
 
       const storeProductDetails = await this.prisma.farmerProduct.create({
         data: {
           farmerId: farmerEmail.id,
-          productId: addProduct.productId,
+          productId: addProduct.productAddress,
           txnId: productDetailId,
         },
       });

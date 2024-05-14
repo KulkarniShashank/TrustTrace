@@ -16,7 +16,7 @@ export class IssuanceService {
 
       const productDetails = await this.prisma.product.findFirst({
         where: {
-          name: 'rice',
+          name: 'Rice',
         },
       });
       const orgId = process.env.ORG_ID;

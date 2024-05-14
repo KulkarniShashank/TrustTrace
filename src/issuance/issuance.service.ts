@@ -2,13 +2,20 @@ import { Injectable } from '@nestjs/common';
 import * as dotenv from 'dotenv';
 import { PrismaService } from '@src/prisma/prisma-service.service';
 import axios from 'axios';
+import CREDEBLAuthTokenService from '@src/CREDEBL-Auth/auth-token';
 dotenv.config();
 
 @Injectable()
 export class IssuanceService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly credeblAuthTokenService: CREDEBLAuthTokenService,
+  ) {}
 
   async outOfBandIssuance(email: string): Promise<any> {
+
+    // const token = await this.credeblAuthTokenService.serviceAuthentication();
+    // console.log(token);
     try {
       const farmerDetails = await this.prisma.farmer.findUnique({
         where: { email },
@@ -67,7 +74,8 @@ export class IssuanceService {
     credentialOffer,
   ): Promise<any> {
     try {
-      const token = '';
+      const token = await this.credeblAuthTokenService.serviceAuthentication();
+      // console.log(token);
       const response = await axios
         .post(sendOutOfbandCredentialOfferUrl, credentialOffer, {
           headers: { Authorization: `Bearer ${token}` },

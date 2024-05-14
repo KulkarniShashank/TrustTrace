@@ -45,7 +45,6 @@ export class ProductController {
   })
   @ApiResponse({ status: HttpStatus.CREATED, description: 'Success' })
   async ProductQR(@Body() productDto: ProductDto, @Res() res: Response) {
-    console.log('productDto----', productDto);
     const qrCode = await this.productService.generateQrCode(
       productDto.productId,
       productDto.productName,
@@ -110,7 +109,7 @@ export class ProductController {
     return res.status(HttpStatus.OK).json(finalResponse);
   }
 
-  @Get('/')
+  @Get('/generate/product/id')
   @ApiOperation({
     summary: 'generateProductId',
     description: 'generateProductId',
@@ -123,6 +122,24 @@ export class ProductController {
       statusCode: HttpStatus.OK,
       message: 'Product Id generated successfully',
       data: productDetails,
+    };
+
+    return res.status(HttpStatus.OK).json(finalResponse);
+  }
+
+  @Get('/')
+  @ApiOperation({
+    summary: 'Get all product data',
+    description: 'Get all product data.',
+  })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Success' })
+  async productDetails(@Res() res: Response): Promise<Response> {
+    const getProductData = await this.productService.productDetails();
+
+    const finalResponse = {
+      statusCode: HttpStatus.OK,
+      message: 'Product archive successfully',
+      data: getProductData,
     };
 
     return res.status(HttpStatus.OK).json(finalResponse);

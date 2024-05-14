@@ -35,7 +35,7 @@ export class IssuanceService {
               isRequired: true,
             },
             {
-              value: productDetails.productId,
+              value: productDetails.id,
               name: 'productId',
               isRequired: true,
             },
@@ -67,10 +67,6 @@ export class IssuanceService {
     credentialOffer,
   ): Promise<any> {
     try {
-      console.log(
-        'sendOutOfbandCredentialOfferUrl--',
-        sendOutOfbandCredentialOfferUrl,
-      );
       const token = '';
       const response = await axios
         .post(sendOutOfbandCredentialOfferUrl, credentialOffer, {

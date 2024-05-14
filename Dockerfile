@@ -3,15 +3,14 @@
 ###################
 
 FROM node:lts-alpine as build
+RUN apk update && apk add openssl
 
 WORKDIR /usr/src/app
-
 COPY package*.json ./
-
-# Install app dependencies using the `npm ci` command instead of `npm install`
 RUN yarn
-
 COPY . .
+
+RUN yarn prisma:generate --schema=./src/prisma/schema.prisma
 
 # Run the build command which creates the production bundle
 RUN yarn build
@@ -25,11 +24,13 @@ RUN yarn --prod
 ###################
 
 FROM node:lts-alpine
+RUN apk update && apk add openssl
 
 # Copy the bundled code from the build stage to the production image
 COPY --from=build /usr/src/app/node_modules ./node_modules
 COPY --from=build /usr/src/app/dist ./dist
 COPY --from=build /usr/src/app/.env ./
+COPY --from=Build /usr/src/app/package.json ./
 
 EXPOSE 3005
 

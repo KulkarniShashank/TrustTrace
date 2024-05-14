@@ -1,26 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import * as dotenv from 'dotenv';
 import { PrismaService } from '@src/prisma/prisma-service.service';
-import { HttpService } from '@nestjs/axios/dist';
+import axios from 'axios';
 dotenv.config();
-import * as QRCode from 'qrcode';
-import { sendEmail } from 'send-grid-helper-file';
-import { OutOfBandIssuance } from './templates/out-of-band-issuance.template';
-import CREDEBLAuthTokenService from '@src/CREDEBL-Auth/auth-token';
 
 @Injectable()
 export class IssuanceService {
-  private readonly httpService = new HttpService();
-  constructor(
-    private readonly prisma: PrismaService,
-    private readonly outOfBandIssuances: OutOfBandIssuance,
-    private readonly credeblAuthTokenService: CREDEBLAuthTokenService,
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async outOfBandIssuance(email: string): Promise<any> {
     try {
       const farmerDetails = await this.prisma.farmer.findUnique({
-        where: { email: email },
+        where: { email },
       });
 
       const productDetails = await this.prisma.product.findFirst({
@@ -28,93 +19,71 @@ export class IssuanceService {
           name: 'rice',
         },
       });
-      const outOfBandIssuancePayload = {
-        protocolVersion: 'v2',
-        credentialFormats: {
-          anoncreds: {
-            attributes: [
-              {
-                name: 'farmer_name',
-                value: farmerDetails.name,
-              },
-              {
-                name: 'farmer_id',
-                value: farmerDetails.id,
-              },
-              {
-                name: 'product_id',
-                value: productDetails?.id,
-              },
-              {
-                name: 'product_name',
-                value: productDetails?.name,
-              },
-            ],
-            credentialDefinitionId: process.env.CREDENTIAL_DEFINITION_ID,
-          },
-        },
-        autoAcceptCredential: 'always',
-        label: farmerDetails?.name,
-      };
-
-      const agentEndpoint = `${process.env.AGENT_ENDPOINT}/credentials/create-offer-oob`;
-      const credentialCreateOfferDetails = await this._outOfBandCredentialOffer(
-        outOfBandIssuancePayload,
-        agentEndpoint,
-      );
-
-      const invitationId: string =
-        credentialCreateOfferDetails.response?.invitation['@id'];
-      const connectionUrl = `${process.env.AGENT_ENDPOINT}/url/${invitationId}`;
-
-      const qrCodeOptions = { type: 'image/png' };
-      const outOfBandIssuanceQrCode = await QRCode.toDataURL(
-        connectionUrl,
-        qrCodeOptions,
-      );
-
-      const emailHtml = this.outOfBandIssuances.outOfBandIssuance(
-        email,
-        farmerDetails?.name,
-        connectionUrl,
-      );
-
-      const emailAttachments = [
+      const orgId = process.env.ORG_ID;
+      const sendOutOfbandCredentialOfferUrl = `${process.env.CREDEBL_URL}/orgs/${orgId}/credentials/oob/email`;
+      const credentialOffer = [
         {
-          filename: 'qrcode.png',
-          content: outOfBandIssuanceQrCode.split(';base64,')[1],
-          contentType: 'image/png',
-          disposition: 'attachment',
+          attributes: [
+            {
+              value: farmerDetails.id,
+              name: 'farmerId',
+              isRequired: true,
+            },
+            {
+              value: farmerDetails.name,
+              name: 'farmerName',
+              isRequired: true,
+            },
+            {
+              value: productDetails.productId,
+              name: 'productId',
+              isRequired: true,
+            },
+            {
+              value: productDetails.name,
+              name: 'productName',
+              isRequired: true,
+            },
+          ],
+          emailId: email,
         },
       ];
-      const emailData = {
-        emailFrom: process.env.EMAIL_FROM,
-        emailTo: email,
-        emailSubject: `Platform: Issuance of Your Credential`,
-        emailHtml,
-        emailAttachments,
+      const oobCredentialIssuance = {
+        credentialDefinitionId: process.env.CREDENTIAL_DEFINITION_ID,
+        credentialOffer,
       };
-      const isEmailSent = await sendEmail(emailData);
-      return isEmailSent;
+      const sendOutOfBand = await this._outOfBandCredentialOffer(
+        sendOutOfbandCredentialOfferUrl,
+        oobCredentialIssuance,
+      );
+      return sendOutOfBand;
     } catch (error) {
       throw error;
     }
   }
 
   async _outOfBandCredentialOffer(
-    outOfBandIssuancePayload,
-    url: string,
+    sendOutOfbandCredentialOfferUrl,
+    credentialOffer,
   ): Promise<any> {
     try {
-      const token = await this.credeblAuthTokenService.serviceAuthentication();
-      const sendOutOfbandCredentialOffer = await this.httpService.post(
-        url,
-        outOfBandIssuancePayload,
-        {
-          headers: { authorization: token },
-        },
+      console.log(
+        'sendOutOfbandCredentialOfferUrl--',
+        sendOutOfbandCredentialOfferUrl,
       );
-      return sendOutOfbandCredentialOffer;
+      const token = '';
+      const response = await axios
+        .post(sendOutOfbandCredentialOfferUrl, credentialOffer, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        .then((response) => {
+          return response;
+        })
+        .catch((error) => {
+          console.log(error);
+          return error;
+        });
+      return response.data;
     } catch (error) {
       throw error;
     }

@@ -16,14 +16,9 @@ async function bootstrap() {
 
   const document = SwaggerModule.createDocument(app, options);
   SwaggerModule.setup('docs', app, document);
-  const { ENABLE_CORS_IP_LIST } = process.env || {};
-  if (ENABLE_CORS_IP_LIST && '' !== ENABLE_CORS_IP_LIST) {
-    app.enableCors({
-      origin: ENABLE_CORS_IP_LIST.split(','),
-      methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-      credentials: true,
-    });
-  }
+
+  app.enableCors();
+
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
   await app.listen(3005);
 }

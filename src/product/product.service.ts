@@ -83,12 +83,18 @@ export class ProductService {
   }
 
   async generateProductId(): Promise<any> {
-    const url = `${process.env.AGENT_ENDPOINT}/polygon/create-keys`;
-    const accessToken = process.env.AGENT_TOKEN;
-    const generateToken = await this.httpService.get(url, {
-      headers: { authorization: accessToken },
-    });
-    return generateToken;
+    try {
+      const url = `${process.env.AGENT_ENDPOINT}/polygon/create-keys`;
+      const accessToken = process.env.AGENT_TOKEN;
+      const generateTokenResponse = await this.httpService
+        .post(url, {}, { headers: { authorization: accessToken } })
+        .toPromise();
+      const generateToken = generateTokenResponse.data;
+      return generateToken;
+    } catch (error) {
+      console.error('Error generating product ID:', error.message);
+      throw error; // Re-throw the error to handle it elsewhere
+    }
   }
 
   async generateQrCode(

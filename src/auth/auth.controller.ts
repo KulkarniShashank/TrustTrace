@@ -2,7 +2,7 @@ import { Controller, Post, Body, HttpStatus, Res } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Response } from 'express';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { FarmerDto } from 'src/dtos/farmer.model.dto';
+import { FarmerDto, FarmerLoginDto } from 'src/dtos/farmer.model.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -25,7 +25,7 @@ export class AuthController {
   }
 
   @Post('login')
-  async login(@Body() farmer, @Res() res: Response) {
+  async login(@Body() farmer: FarmerLoginDto, @Res() res: Response) {
     await this.authService.login(farmer);
     const finalResponse = {
       statusCode: HttpStatus.CREATED,

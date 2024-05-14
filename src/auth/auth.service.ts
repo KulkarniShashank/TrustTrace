@@ -2,7 +2,7 @@
 
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import * as jwt from 'jsonwebtoken';
-import { FarmerDto } from '../dtos/farmer.model.dto';
+import { FarmerDto, FarmerLoginDto } from '../dtos/farmer.model.dto';
 import * as bcrypt from 'bcryptjs'; // Import bcrypt
 import { PrismaService } from '../prisma/prisma-service.service'; // Import PrismaService
 
@@ -26,7 +26,7 @@ export class AuthService {
     return createdFarmer;
   }
 
-  async login(farmer: FarmerDto): Promise<string> {
+  async login(farmer: FarmerLoginDto): Promise<string> {
     const farmerDetails = await this.prisma.farmer.findUnique({
       where: { email: farmer.email },
     });

@@ -26,3 +26,13 @@ export class FarmerDto {
   @IsNotEmpty({ message: 'isVerified is required' })
   isVerified: boolean;
 }
+
+export class FarmerLoginDto {
+  @ApiProperty()
+  @IsNotEmpty({ message: 'email is required' })
+  email: string;
+
+  @ApiProperty()
+  @IsNotEmpty({ message: 'password is required' })
+  password: string;
+}

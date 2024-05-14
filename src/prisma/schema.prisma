@@ -27,12 +27,9 @@ model Vendor {
 
 // Define the product table
 model Product {
-  id   String @id @default(uuid()) @db.Uuid
-  name String
-  productAddress String @default("")
-
-  // Define the relationship with farmer_product table
-  farmerProducts FarmerProduct[]
+  id             String @id @default(uuid()) @db.Uuid
+  name           String
+  productAddress String @unique
 }
 
 // Define the farmer table
@@ -51,14 +48,15 @@ model Farmer {
 
 // Define the farmer_product table
 model FarmerProduct {
-  id        String @id @default(uuid()) @db.Uuid
-  farmerId  String @unique @db.Uuid
-  productId String @unique @db.Uuid
-  txnId     String @unique @db.Uuid
+  id        String  @id @default(uuid()) @db.Uuid
+  farmerId  String  @db.Uuid
+  productId String
+  txnId     String  @unique @db.Uuid
+  vendorId  String? @db.Uuid
 
   // Define the relationships with other tables
-  farmer   Farmer  @relation(fields: [farmerId], references: [id])
-  product  Product @relation(fields: [productId], references: [id])
-  vendor   Vendor? @relation(fields: [vendorId], references: [id])
-  vendorId String? @db.Uuid
+  farmer Farmer  @relation(fields: [farmerId], references: [id])
+  vendor Vendor? @relation(fields: [vendorId], references: [id])
+
+  @@unique([farmerId, productId, txnId]) // Enforce unique constraints as needed
 }

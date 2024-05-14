@@ -11,6 +11,7 @@ import { ProductService } from './product.service';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { Response } from 'express';
 import { AddProduct } from 'src/dtos/add-product.dto';
+import { ProductDto } from 'src/dtos/product.dto';
 
 @Controller('product')
 export class ProductController {
@@ -35,6 +36,30 @@ export class ProductController {
     };
 
     return res.status(HttpStatus.CREATED).json(finalResponse);
+  }
+
+  @Post('/qr')
+  @ApiOperation({
+    summary: 'Get product QR',
+    description: 'Get product QR',
+  })
+  @ApiResponse({ status: HttpStatus.CREATED, description: 'Success' })
+  async ProductQR(@Body() productDto: ProductDto, @Res() res: Response) {
+    const qrCode = await this.productService.generateQrCode(
+      productDto.productId,
+      productDto.productName,
+    );
+
+    res.setHeader('Content-Type', 'image/png');
+
+    if (productDto.productId && productDto.productName) {
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename=${productDto.productName}.png`,
+      );
+    }
+
+    res.send(Buffer.from(qrCode.split(',')[1], 'base64'));
   }
 
   @Get('/:productDetailId/:productId')
@@ -84,7 +109,7 @@ export class ProductController {
     return res.status(HttpStatus.OK).json(finalResponse);
   }
 
-  @Get('/')
+  @Get('/generate/product/id')
   @ApiOperation({
     summary: 'generateProductId',
     description: 'generateProductId',
@@ -97,6 +122,24 @@ export class ProductController {
       statusCode: HttpStatus.OK,
       message: 'Product Id generated successfully',
       data: productDetails,
+    };
+
+    return res.status(HttpStatus.OK).json(finalResponse);
+  }
+
+  @Get('/')
+  @ApiOperation({
+    summary: 'Get all product data',
+    description: 'Get all product data.',
+  })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Success' })
+  async productDetails(@Res() res: Response): Promise<Response> {
+    const getProductData = await this.productService.productDetails();
+
+    const finalResponse = {
+      statusCode: HttpStatus.OK,
+      message: 'Product archive successfully',
+      data: getProductData,
     };
 
     return res.status(HttpStatus.OK).json(finalResponse);

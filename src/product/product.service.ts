@@ -5,13 +5,22 @@ import { abi } from 'config';
 import { v4 as uuidv4 } from 'uuid';
 import * as dotenv from 'dotenv';
 import { HttpService } from '@nestjs/axios';
+import { PrismaService } from '@src/prisma/prisma-service.service';
 dotenv.config();
+import * as QRCode from 'qrcode';
 
 @Injectable()
 export class ProductService {
   private readonly httpService = new HttpService();
+  constructor(private readonly prisma: PrismaService) {}
+
   async addProduct(addProduct: AddProduct): Promise<any> {
     try {
+      const farmerEmail = await this.prisma.farmer.findUnique({
+        where: {
+          email: addProduct.farmerEmail,
+        },
+      });
       const url = process.env.URL;
       const contractAddress = process.env.CONTRACT_ADDRESS;
       if (!url || !contractAddress) {
@@ -38,6 +47,16 @@ export class ProductService {
         productTnxId: productDetailId,
         productId: addProduct.productId,
       };
+
+      const storeProductDetails = await this.prisma.farmerProduct.create({
+        data: {
+          farmerId: farmerEmail.id,
+          productId: addProduct.productId,
+          txnId: productDetailId,
+        },
+      });
+
+      console.log(`storeProductDetails :::: ${storeProductDetails}`);
       return productDetailsResponse;
     } catch (error) {
       console.error('Error in addProduct:', error);
@@ -82,11 +101,48 @@ export class ProductService {
   }
 
   async generateProductId(): Promise<any> {
-    const url = `${process.env.AGENT_ENDPOINT}/polygon/create-keys`;
-    const accessToken = process.env.AGENT_TOKEN;
-    const generateToken = await this.httpService.get(url, {
-      headers: { authorization: accessToken },
-    });
-    return generateToken;
+    try {
+      const url = `${process.env.AGENT_ENDPOINT}/polygon/create-keys`;
+      const accessToken = process.env.AGENT_TOKEN;
+      const generateTokenResponse = await this.httpService
+        .post(url, {}, { headers: { authorization: accessToken } })
+        .toPromise();
+      const generateToken = generateTokenResponse.data;
+      return generateToken;
+    } catch (error) {
+      console.error('Error generating product ID:', error.message);
+      throw error; // Re-throw the error to handle it elsewhere
+    }
+  }
+
+  async generateQrCode(
+    productId: string,
+    productName: string,
+  ): Promise<string> {
+    const jsonData = {
+      productId,
+      productName,
+    };
+    const jsonString = JSON.stringify(jsonData);
+    try {
+      const qrCode = await QRCode.toDataURL(jsonString);
+      return qrCode;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async productDetails(): Promise<
+    {
+      id: string;
+      name: string;
+    }[]
+  > {
+    try {
+      const getVendorData = await this.prisma.product.findMany();
+      return getVendorData;
+    } catch (error) {
+      throw error;
+    }
   }
 }

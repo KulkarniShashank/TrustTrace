@@ -29,7 +29,6 @@ model Vendor {
 model Product {
   id   String @id @default(uuid()) @db.Uuid
   name String
-  productId String
 
   // Define the relationship with farmer_product table
   farmerProducts FarmerProduct[]

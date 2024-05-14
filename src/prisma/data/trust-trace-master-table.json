@@ -1,0 +1,49 @@
+{
+  "vendorData": [
+    {
+      "id": "3e1f4b9e-7a7c-48c9-95a0-d527b8392e18",
+      "name": "XYZ Technologies",
+      "location": "Mumbai",
+      "email": "jane.smith@xyztech.com",
+      "mobile": "987-654-3210"
+    },
+    {
+      "id": "5bb1f1e5-2c47-4d49-b4e4-91f2a62c0d36",
+      "name": "Green Earth Products",
+      "location": "Nisha Patel",
+      "email": "nisha.patel@greenearth.com",
+      "mobile": "123-987-6543"
+    },
+    {
+      "id": "62fa7d56-1b1c-4f8e-a1c0-337ae123d317",
+      "name": "Tech Innovators Ltd",
+      "location": "Sangli",
+      "email": "eturner@techinnovators.com",
+      "mobile": "321-654-9870"
+    },
+    {
+      "id": "a9c9b7b3-d082-4a7c-ae1b-22e6d2a16f55",
+      "name": "Global Trade Co.",
+      "location": "Latur",
+      "email": "carlos@globaltrade.com",
+      "mobile": "654-321-0987"
+    },
+    {
+      "id": "d5fbb9d4-8a45-4f91-b9d2-35c3f5a3d347",
+      "name": "ABC Supplies Inc.",
+      "location": "Pune",
+      "email": "johndoe@yopmail.com",
+      "mobile": "123-456-7890"
+    }
+  ],
+  "productData": [
+    {
+      "id": "b3a1b9f6-5f4d-456e-89cb-982d93e289f8",
+      "name": "Rice"
+    },
+    {
+      "id": "f9b2d8c3-9a49-4d83-837f-4a27f25b6b5e",
+      "name": "Mango"
+    }
+  ]
+}

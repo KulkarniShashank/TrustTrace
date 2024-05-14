@@ -22,5 +22,6 @@
       "@lib/*": ["lib/*"],
       "@config/*": ["config/*"]
     }
-  }
+  },
+  "include": ["prisma/**/*", "src/**/*"]
 }

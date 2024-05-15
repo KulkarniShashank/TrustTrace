@@ -12,6 +12,7 @@ async function bootstrap() {
     .setVersion('1.0')
     .addBearerAuth()
     .addServer(`http://localhost:3005`)
+    .addServer(`https://trusttrace-api.credebl.id`)
     .build();
 
   const document = SwaggerModule.createDocument(app, options);

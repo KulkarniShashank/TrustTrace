@@ -1,6 +1,10 @@
 // auth.service.ts
 
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import * as jwt from 'jsonwebtoken';
 import { FarmerDto, FarmerLoginDto } from '../dtos/farmer.model.dto';
 import * as bcrypt from 'bcryptjs'; // Import bcrypt
@@ -33,6 +37,15 @@ export class AuthService {
     if (!farmer) {
       throw new UnauthorizedException('Invalid email or password');
     }
+    const getProduct = await this.prisma.product.findFirst({
+      where: {
+        name: 'Rice',
+      },
+    });
+
+    if (!getProduct) {
+      throw new NotFoundException('Product not found');
+    }
 
     const isValidPassword = await bcrypt.compare(
       farmer.password,
@@ -43,9 +56,9 @@ export class AuthService {
     }
 
     // Generate token upon successful sign-in
-    const token = jwt.sign({ email: farmer.email }, this.jwtSecret, {
+    jwt.sign({ email: farmer.email }, this.jwtSecret, {
       expiresIn: '1d',
     });
-    return token;
+    return getProduct?.productAddress;
   }
 }

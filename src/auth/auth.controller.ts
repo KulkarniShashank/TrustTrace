@@ -26,10 +26,11 @@ export class AuthController {
 
   @Post('login')
   async login(@Body() farmer: FarmerLoginDto, @Res() res: Response) {
-    await this.authService.login(farmer);
+    const productIAddress = await this.authService.login(farmer);
     const finalResponse = {
       statusCode: HttpStatus.CREATED,
       message: 'Login successfully',
+      data: productIAddress,
     };
     return res.status(HttpStatus.CREATED).json(finalResponse);
   }

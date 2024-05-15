@@ -13,8 +13,6 @@ export class IssuanceService {
   ) {}
 
   async outOfBandIssuance(email: string): Promise<any> {
-    // const token = await this.credeblAuthTokenService.serviceAuthentication();
-    // console.log(token);
     try {
       const farmerDetails = await this.prisma.farmer.findUnique({
         where: { email },
@@ -41,13 +39,18 @@ export class IssuanceService {
               isRequired: true,
             },
             {
-              value: productDetails.id,
-              name: 'productId',
+              value: productDetails.productAddress,
+              name: 'productAddress',
               isRequired: true,
             },
             {
               value: productDetails.name,
               name: 'productName',
+              isRequired: true,
+            },
+            {
+              value: farmerDetails.email,
+              name: 'farmerEmail',
               isRequired: true,
             },
           ],
@@ -73,8 +76,12 @@ export class IssuanceService {
     credentialOffer,
   ): Promise<any> {
     try {
-      const token = await this.credeblAuthTokenService.serviceAuthentication();
-      // console.log(token);
+      let token;
+      if (token) {
+        token = await this.credeblAuthTokenService.serviceAuthentication();
+      } else {
+        token = process.env.CREDEBL_TOKEN;
+      }
       const response = await axios
         .post(sendOutOfbandCredentialOfferUrl, credentialOffer, {
           headers: { Authorization: `Bearer ${token}` },

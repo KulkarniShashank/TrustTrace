@@ -76,15 +76,10 @@ export class IssuanceService {
     credentialOffer,
   ): Promise<any> {
     try {
-      let token;
-      if (token) {
-        token = await this.credeblAuthTokenService.serviceAuthentication();
-      } else {
-        token = process.env.CREDEBL_TOKEN;
-      }
+      const token = await this.credeblAuthTokenService.serviceAuthentication();
       const response = await axios
         .post(sendOutOfbandCredentialOfferUrl, credentialOffer, {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { Authorization: token },
         })
         .then((response) => {
           return response;
